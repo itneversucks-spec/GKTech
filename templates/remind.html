@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ p.get('business_name','Internet') }} - Payment reminder</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#14202e;--mute:#4f5f72;--line:#d5dce4;--acc:#0b57c4;--warn:#9a3412;--warnbg:#fff4e8}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141b;--card:#18202a;--ink:#eef2f7;--mute:#a7b4c3;--line:#2b3644;--acc:#7db3ff;--warn:#ffb98a;--warnbg:#2b1f14}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:460px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-weight:700;letter-spacing:.3px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px}
+.banner{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 14px;font-weight:600;margin-bottom:14px}
+h1{font-size:23px;line-height:1.25;margin:0 0 6px}
+.mute{color:var(--mute)}.amt{font-size:44px;font-weight:800;line-height:1.1;margin:6px 0 2px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.kv span:first-child{color:var(--mute)}.kv b{text-align:right;word-break:break-word}
+ol{padding-left:22px;margin:8px 0 0}li{margin:7px 0}
+.num{font-size:24px;font-weight:800;letter-spacing:1px}
+button{margin-top:8px;padding:11px 16px;border:0;border-radius:10px;background:var(--acc);color:#fff;font:inherit;font-weight:600;width:100%}
+.pre{font-size:13px;text-align:center;color:var(--mute)}
+</style></head><body><div class="wrap">
+<div class="brand">{{ p.get('business_name','Internet') }}</div>
+{% if preview %}<div class="pre" style="margin-bottom:10px">Preview as the customer sees it</div>{% endif %}
+{% if c %}
+  <div class="banner">Your internet is paused because of an unpaid balance.</div>
+  <div class="card">
+    <h1>Hi {{ c['first_name'] or c['username'] }},</h1>
+    {% if amount > 0 %}
+      <div class="mute">Amount due</div>
+      <div class="amt">₱{{ '{:,.2f}'.format(amount) }}</div>
+      {% if c['due_date'] %}<div class="mute">Due {{ c['due_date'] }}</div>{% endif %}
+      <div style="margin-top:10px">
+        <div class="kv"><span>Account</span><b>{{ c['username'] }}</b></div>
+        <div class="kv"><span>Plan</span><b>{{ c['plan'] }}</b></div>
+      </div>
+    {% else %}
+      <p>We don't see a balance on your account. If you have just paid, your connection will be restored shortly. If not, please contact us below.</p>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="banner">Your internet is paused because of an unpaid balance.</div>
+  <div class="card"><h1>Please settle your account</h1>
+  <p class="mute">We couldn't match this connection to your account automatically. Contact us and we'll restore it once your payment is confirmed.</p></div>
+{% endif %}
+<div class="card">
+  <h1 style="font-size:19px">How to pay</h1>
+  <ol>
+    <li>Open GCash and send the amount to:
+      <div class="num" id="gnum">{{ p.get('gcash_number','') }}</div>
+      <div class="mute">{{ p.get('gcash_name','') }}</div></li>
+    <li>Put <b>{{ c['username'] if c else 'your account name' }}</b> in the message.</li>
+    <li>{{ p.get('extra_note','') }}</li>
+  </ol>
+  <button type="button" onclick="cp()" id="cb" style="display:none">Copy GCash number</button>
+</div>
+<div class="card"><div class="mute">Need help?</div><div>{{ p.get('contact','') }}</div></div>
+</div>
+<script>
+(function(){var n=document.getElementById('gnum');if(!n||!navigator.clipboard)return;
+document.getElementById('cb').style.display='block';
+window.cp=function(){navigator.clipboard.writeText(n.textContent.replace(/\s/g,'')).then(function(){document.getElementById('cb').textContent='Copied'})}})();
+</script></body></html>

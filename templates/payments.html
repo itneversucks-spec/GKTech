@@ -1,0 +1,14 @@
+{% extends "admin_base.html" %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+<h1>Payments</h1>
+<form method="get" class="card row" style="align-items:end"><label>From<input name="from" value="{{ frm }}"></label><label>To<input name="to" value="{{ to }}"></label>
+<div><button>Show</button> <a class="btn" style="background:var(--mute)" href="{{ url_for('payments_csv', **{'from': frm, 'to': to}) }}">Download CSV</a></div></form>
+<div class="row"><div class="card"><div class="stat">{{ grand|peso }}</div><div class="mute">total received</div></div>
+{% for m, v in totals.items() %}<div class="card"><div class="stat">{{ v|peso }}</div><div class="mute">{{ m }}</div></div>{% endfor %}</div>
+<div class="scroll"><table><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Amount</th><th>Method</th><th>Reference</th></tr>
+{% for r in rows %}<tr {% if r['voided'] %}style="opacity:.55;text-decoration:line-through"{% endif %}><td><a href="{{ url_for('receipt', pid=r['id']) }}">OR-{{ '%06d'|format(r['id']) }}</a></td>
+<td>{{ r['received_on'] }}</td><td><a href="{{ url_for('customer', cid=r['customer_id']) }}">{{ r['first_name'] }} {{ r['last_name'] }}</a></td>
+<td>{{ r['amount']|peso }}</td><td>{{ r['method'] }}</td><td>{{ r['reference'] }}</td></tr>
+{% else %}<tr><td colspan="6" class="mute">No payments in this range.</td></tr>{% endfor %}</table></div>
+{% endblock %}

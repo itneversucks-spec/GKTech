@@ -1,0 +1,15 @@
+{% extends "admin_base.html" %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+<h1>Customers</h1>
+<div class="row"><div class="card"><div class="stat">{{ total }}</div><div class="mute">customers</div></div>
+<div class="card"><div class="stat">{{ n_over }}</div><div class="mute">past due</div></div>
+<div class="card"><div class="stat">₱{{ '{:,.0f}'.format(owed) }}</div><div class="mute">total balance</div></div></div>
+<form method="get" class="row" style="margin-bottom:12px"><input name="q" value="{{ q }}" placeholder="Search name, username, phone">
+<select name="f" style="padding:8px"><option value="">All</option><option value="overdue" {{ 'selected' if f=='overdue' }}>Past due</option></select><button>Filter</button></form>
+<div class="scroll"><table><tr><th>Name</th><th>Username</th><th>Plan</th><th>Due</th><th>Balance</th><th></th></tr>
+{% for r, od in rows %}<tr><td><a href="{{ url_for('customer', cid=r['id']) }}">{{ r['first_name'] }} {{ r['last_name'] }}</a></td>
+<td>{{ r['username'] }}</td><td>{{ r['plan'] }}</td><td>{{ r['due_date'] or '' }}</td>
+<td>₱{{ '{:,.0f}'.format(r['balance'] or 0) }}</td><td>{% if od %}<span class="tag bad">past due</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="mute">No customers. Use Import.</td></tr>{% endfor %}</table></div>
+{% endblock %}

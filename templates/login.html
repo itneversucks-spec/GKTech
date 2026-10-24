@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block body %}<div class="wrap" style="max-width:360px;margin-top:60px">
+<h1>Billing admin</h1>
+{% with m = get_flashed_messages() %}{% for x in m %}<div class="flash">{{ x }}</div>{% endfor %}{% endwith %}
+<form method="post" class="card"><label>Password<input type="password" name="password" autofocus autocomplete="current-password"></label><p><button>Log in</button></p></form></div>{% endblock %}

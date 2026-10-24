@@ -1,0 +1,12 @@
+{% extends "admin_base.html" %}
+{% block title %}Import{% endblock %}
+{% block content %}
+<h1>Import customers</h1>
+<form method="post" enctype="multipart/form-data" class="card"><input type="hidden" name="_csrf" value="{{ csrf() }}">
+<p>Choose the customer export (tab or comma separated). New usernames are added; existing ones get updated details. The PASSWORD column is never read or stored.</p>
+<input type="file" name="file" accept=".csv,.txt,.tsv">
+<p><label style="display:inline"><input type="checkbox" name="overwrite" style="width:auto"> Also replace balances and due dates with the file's values</label><br>
+<span class="mute">Leave this off normally: payments recorded here would be overwritten. Use it only to re-sync with Taoki while both run side by side.</span></p>
+<p><button>Import</button></p></form>
+{% if result %}<div class="card">Added <b>{{ result[0] }}</b>, updated <b>{{ result[1] }}</b>, skipped <b>{{ result[2] }}</b> empty rows.</div>{% endif %}
+{% endblock %}

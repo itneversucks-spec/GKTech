@@ -1,0 +1,9 @@
+{% extends "admin_base.html" %}
+{% block title %}Lookups{% endblock %}
+{% block content %}
+<h1>Recent reminder-page lookups</h1>
+<p class="mute">If every row shows the router's own IP or "no-session", the router is still masquerading overdue traffic to this server.</p>
+<div class="scroll"><table><tr><th>Time</th><th>Client IP</th><th>Username</th><th>Result</th></tr>
+{% for r in rows %}<tr><td>{{ r['ts'] }}</td><td>{{ r['ip'] }}</td><td>{{ r['username'] or '' }}</td><td>{{ r['result'] }}</td></tr>
+{% else %}<tr><td colspan="4" class="mute">Nothing yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

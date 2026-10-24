@@ -1,0 +1,14 @@
+{% extends "admin_base.html" %}
+{% block title %}Invoices{% endblock %}
+{% block content %}
+<h1>Create invoices</h1>
+<form method="get" class="card row" style="align-items:end"><label>Bill everyone due on or before<input name="through" value="{{ through }}"></label><div><button>Preview</button></div></form>
+<p class="mute">Each invoice adds the monthly fee to the customer's balance, once per due date. Customers whose balance already covers a month (for example, balances imported from Taoki) are unticked so they are not billed twice.</p>
+<form method="post"><input type="hidden" name="_csrf" value="{{ csrf() }}"><input type="hidden" name="through" value="{{ through }}">
+<div class="scroll"><table><tr><th></th><th>Customer</th><th>Plan</th><th>Due</th><th>Monthly fee</th><th>Balance now</th></tr>
+{% for c, already in rows %}<tr><td><input type="checkbox" name="cid" value="{{ c['id'] }}" {{ '' if already else 'checked' }} style="width:auto"></td>
+<td>{{ c['first_name'] }} {{ c['last_name'] }}<br><span class="mute">{{ c['username'] }}</span></td><td>{{ c['plan'] }}</td><td>{{ c['due_date'] }}</td>
+<td>{{ c['mrc']|peso }}</td><td>{{ c['balance']|peso }}{% if already %} <span class="tag">already covers a month</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="mute">Nothing to invoice for that date.</td></tr>{% endfor %}</table></div>
+{% if rows %}<p><button>Create selected invoices</button></p>{% endif %}</form>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block body %}
+<nav><strong>Billing</strong><a href="{{ url_for('customers') }}">Customers</a>
+<a href="{{ url_for('billing') }}">Invoices</a><a href="{{ url_for('payments') }}">Payments</a>
+<a href="{{ url_for('import_view') }}">Import</a><a href="{{ url_for('lookups') }}">Lookups</a>
+<form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="_csrf" value="{{ csrf() }}"><button>Log out</button></form></nav>
+<div class="wrap">
+{% with m = get_flashed_messages() %}{% for x in m %}<div class="flash">{{ x }}</div>{% endfor %}{% endwith %}
+{% block content %}{% endblock %}</div>
+{% endblock %}

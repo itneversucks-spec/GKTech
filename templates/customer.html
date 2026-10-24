@@ -1,0 +1,55 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ c['username'] }}{% endblock %}
+{% block content %}
+<h1>{{ c['first_name'] }} {{ c['last_name'] }} {% if overdue %}<span class="tag bad">past due</span>{% endif %}</h1>
+<div class="card"><div class="row">
+<div><span class="mute">Username</span><br>{{ c['username'] }}</div>
+<div><span class="mute">Plan</span><br>{{ c['plan'] }} ({{ c['mrc']|peso }}/mo)</div>
+<div><span class="mute">Phone</span><br>{{ c['phone'] or '-' }}</div>
+<div><span class="mute">Balance</span><br><span class="stat">{{ c['balance']|peso }}</span></div>
+<div><span class="mute">Next due</span><br><b>{{ c['due_date'] or '-' }}</b></div></div></div>
+
+<form method="post" action="{{ url_for('pay', cid=c['id']) }}" class="card"><input type="hidden" name="_csrf" value="{{ csrf() }}">
+<b>Record a payment</b>
+<div class="row" style="margin-top:8px">
+<label>Amount (₱)<input name="amount" inputmode="decimal" value="{{ '%.2f'|format(c['balance']) if c['balance'] > 0 else '' }}" required></label>
+<label>Method<select name="method" style="width:100%;padding:8px"><option value="gcash">GCash</option><option value="cash">Cash</option><option value="other">Other</option></select></label>
+<label>GCash reference no.<input name="reference" placeholder="from the GCash receipt" autocomplete="off"></label>
+<label>Date received<input name="received_on" value="{{ today }}"></label></div>
+<label>Note (optional)<input name="note" maxlength="200"></label>
+<p><label style="display:inline"><input type="checkbox" name="again" style="width:auto"> record again anyway (if this really is a second, identical payment)</label></p>
+<button>Record payment</button>
+<span class="mute"> Clearing the balance moves the next due date forward one month.</span></form>
+
+<form method="post" class="card"><input type="hidden" name="_csrf" value="{{ csrf() }}">
+<div class="row"><label>Next due date (YYYY-MM-DD)<input name="due_date" value="{{ c['due_date'] or '' }}"></label>
+<label>Note<input name="note" value="{{ c['note'] }}"></label></div>
+<p><button>Save</button> <a class="btn" style="background:var(--mute)" href="{{ url_for('preview', cid=c['id']) }}" target="_blank">Preview reminder page</a></p></form>
+
+<h2>Payments</h2>
+<div class="scroll"><table><tr><th>Receipt</th><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th><th></th></tr>
+{% for p in payments %}<tr {% if p['voided'] %}style="opacity:.55;text-decoration:line-through"{% endif %}>
+<td><a href="{{ url_for('receipt', pid=p['id']) }}">OR-{{ '%06d'|format(p['id']) }}</a></td><td>{{ p['received_on'] }}</td><td>{{ p['amount']|peso }}</td>
+<td>{{ p['method'] }}</td><td>{{ p['reference'] }}</td>
+<td>{% if p['voided'] %}voided: {{ p['void_reason'] }}{% else %}
+<form method="post" action="{{ url_for('void_payment', pid=p['id']) }}" style="display:flex;gap:6px"><input type="hidden" name="_csrf" value="{{ csrf() }}">
+<input name="reason" placeholder="reason to void" required style="min-width:120px"><button style="background:var(--bad)">Void</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="mute">No payments recorded here yet.</td></tr>{% endfor %}</table></div>
+
+<h2>Invoices</h2>
+<div class="scroll"><table><tr><th>Due</th><th>Amount</th><th>Issued</th><th>Status</th><th></th></tr>
+{% for i in invoices %}<tr><td>{{ i['period'] }}</td><td>{{ i['amount']|peso }}</td><td>{{ i['issued_on'] }}</td><td>{{ i['status'] }}</td>
+<td>{% if i['status'] != 'void' %}<form method="post" action="{{ url_for('void_invoice', iid=i['id']) }}" style="display:flex;gap:6px"><input type="hidden" name="_csrf" value="{{ csrf() }}">
+<input name="reason" placeholder="reason to void" required style="min-width:120px"><button style="background:var(--bad)">Void</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="5" class="mute">No invoices yet.</td></tr>{% endfor %}</table></div>
+
+<h2>Adjust balance</h2>
+<form method="post" action="{{ url_for('adjust', cid=c['id']) }}" class="card"><input type="hidden" name="_csrf" value="{{ csrf() }}">
+<div class="row"><label>New balance (₱)<input name="new_balance" inputmode="decimal" required></label>
+<label>Reason (required)<input name="note" required></label></div><p><button>Adjust</button> <span class="mute">For corrections only, e.g. to match Taoki during the parallel run.</span></p></form>
+
+<h2>Ledger</h2>
+<div class="scroll"><table><tr><th>When</th><th>Type</th><th>Change</th><th>Balance after</th><th>Note</th></tr>
+{% for l in ledger %}<tr><td>{{ l['ts'] }}</td><td>{{ l['kind'] }}</td><td>{{ l['delta']|peso }}</td><td>{{ l['balance_after']|peso }}</td><td>{{ l['ref'] }} {{ l['note'] }}</td></tr>
+{% else %}<tr><td colspan="5" class="mute">Empty.</td></tr>{% endfor %}</table></div>
+{% endblock %}

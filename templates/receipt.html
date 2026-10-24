@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Receipt OR-{{ '%06d'|format(p['id']) }}</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:420px;margin:20px auto;padding:0 16px;color:#111}
+h1{font-size:20px;margin:0}.kv{display:flex;justify-content:space-between;border-top:1px solid #ccc;padding:8px 0;gap:12px}
+.amt{font-size:34px;font-weight:800;margin:10px 0}.void{color:#b42318;font-weight:700}
+@media print{.no{display:none}}</style></head><body>
+<h1>{{ pg.get('business_name','Internet') }}</h1><div>Official receipt OR-{{ '%06d'|format(p['id']) }}</div>
+{% if p['voided'] %}<div class="void">VOIDED: {{ p['void_reason'] }}</div>{% endif %}
+<div class="amt">{{ p['amount']|peso }}</div>
+<div class="kv"><span>Customer</span><b>{{ c['first_name'] }} {{ c['last_name'] }}</b></div>
+<div class="kv"><span>Account</span><b>{{ c['username'] }}</b></div>
+<div class="kv"><span>Plan</span><b>{{ c['plan'] }}</b></div>
+<div class="kv"><span>Date received</span><b>{{ p['received_on'] }}</b></div>
+<div class="kv"><span>Method</span><b>{{ p['method']|upper }}{% if p['reference'] %} · {{ p['reference'] }}{% endif %}</b></div>
+{% if p['due_after'] and p['due_after'] != p['due_before'] %}<div class="kv"><span>Next due date</span><b>{{ p['due_after'] }}</b></div>{% endif %}
+<div class="kv"><span>Balance now</span><b>{{ c['balance']|peso }}</b></div>
+<p class="no"><button onclick="window.print()">Print</button> <a href="{{ url_for('customer', cid=c['id']) }}">Back to customer</a></p>
+</body></html>
